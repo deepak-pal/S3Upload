@@ -1,3 +1,4 @@
+
 service: s3-upload
 
 provider:
@@ -5,30 +6,31 @@ provider:
   runtime: nodejs12.x
   stage: dev
   region: us-west-1
-plugins:
- -serverless-iam-roles-per-function 
 
 custom:
   fileUploadBucketName: ${self:service}-bucket-${self:provider.stage}
-functions:
-s3Upload:
- handler: src/upload.handler
- name: s3-upload
- description: A lamda Handler to upload file to s3 bucket 
- timeout: 60 # sec
- memmorysize: 128 #mb
- events:
-  -http:
-    path: images
-    method: POST
-iamRoleStatements: 
- - Effect: Allow
-   Action:
-   -"s3:Put*"
-   Resource: arn:aws:s3:::${self:custom.fileUploadBucketName}/*
-enviroment:
-FILE_UPLOAD_BUCKET_NAME:${self.custome.fileUploadBucketName}
 
+plugins:
+  - serverless-iam-roles-per-function
+
+functions:
+  s3Upload:
+    handler: src/upload.handler
+    name: s3-file-uploader
+    description: A lambda handler that uploads a file to an S3 bucket based on an API Gateway trigger.
+    timeout: 60 # seconds
+    memorySize: 128 # mb
+    events:
+      - http:
+          path: images
+          method: POST
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - "s3:Put*"
+        Resource: arn:aws:s3:::${self:custom.fileUploadBucketName}/*
+    environment:
+      FILE_UPLOAD_BUCKET_NAME: ${self:custom.fileUploadBucketName}
 
 resources:
   Resources:
