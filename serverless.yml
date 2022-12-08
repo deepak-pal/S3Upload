@@ -6,6 +6,12 @@ provider:
   runtime: nodejs12.x
   stage: dev
   region: us-west-2
+  iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - "s3:Put*"
+        Resource: arn:aws:s3:::${self:custom.fileUploadBucketName}/*
+
 
 custom:
   fileUploadBucketName: ${self:service}-bucket-${self:provider.stage}
