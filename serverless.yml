@@ -10,7 +10,7 @@ provider:
 custom:
   fileUploadBucketName: ${self:service}-bucket-${self:provider.stage}
 
-plugins:
+plugins: 
   - serverless-iam-roles-per-function
 
 functions:
