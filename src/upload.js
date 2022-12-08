@@ -1,39 +1,36 @@
-const AWSSDK = require("aws-sdk");
-const s3 = new AWSSDK.S3();
+const AWS = require("aws-sdk");
+const s3 = new AWS.S3();
 
 const BUCKET_NAME = process.env.FILE_UPLOAD_BUCKET_NAME;
 
-module.exports.handler = async (event, context) =>{
-    console.dir(event);
-    console.dir(context);
+module.exports.handler = async (event) => {
+    console.log(event);
 
     const response = {
-        isBaseEncoded:false,
-        statusCode:200,
-        body:JSON.stringify({message:"Successfully Upload the file to s3"})
-    }
+        isBase64Encoded: false,
+        statusCode: 200,
+        body: JSON.stringify({ message: "Successfully uploaded file to S3" }),
+    };
 
     try {
-const parseBody = JSON.parse(response);
-const base64File= parseBody.file;
-const decodeFile = Buffer.from(base64File.replace(/^data:image\/\w+;base64,/,""));
-const params ={
-    Bucket:BUCKET_NAME,
-    Key:`image/${new Date().toISOString()}.jpeg`,
-    body:decodeFile,
-    ContentType: "image/jpeg",
-}
- const uploadResult = await s3.upload(params).promise();
- response.body = JSON.stringify({message:"Successfully Upload the file to s3", uploadResult});
+        const parsedBody = JSON.parse(event.body);
+        const base64File = parsedBody.file;
+        const decodedFile = Buffer.from(base64File.replace(/^data:image\/\w+;base64,/, ""), "base64");
+        const params = {
+            Bucket: BUCKET_NAME,
+            Key: `images/${new Date().toISOString()}.jpeg`,
+            Body: decodedFile,
+            ContentType: "image/jpeg",
+        };
 
+        const uploadResult = await s3.upload(params).promise();
 
-    }catch(e){
-console.error(e);
-response.body = JSON.stringify({message:"File Failed  Upload the file to s3"});
-response.statusCode= 500;
-
+        response.body = JSON.stringify({ message: "Successfully uploaded file to S3", uploadResult });
+    } catch (e) {
+        console.error(e);
+        response.body = JSON.stringify({ message: "File failed to upload", errorMessage: e });
+        response.statusCode = 500;
     }
 
     return response;
-
-}
+};
