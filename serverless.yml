@@ -3,7 +3,7 @@ service: s3-upload
 provider:
   name: aws
   runtime: nodejs12.x
-  stage: prod
+  stage: dev
   region: us-west-1
 
 custom:
